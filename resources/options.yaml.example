@@ -1,0 +1,10 @@
+options:
+  headless: false
+  identityProvider: 0
+  ownerPrefix: 
+  hub:
+    name: 
+    baseDomain: server.example.com
+    user: kubeadmin
+    password: changeme
+    kubecontext: "default/api-server-example-com:6443/kube:admin"
