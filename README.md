@@ -6,9 +6,11 @@ ginkgo based end to end testing for Red Hat Open Cluster Management
 
 ### From Source
 
+```bash
 git clone 
-vi resources/config.yaml
+vi resources/options.yaml
 ginkgo
+```
 
 ### From Container
 
