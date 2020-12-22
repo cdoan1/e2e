@@ -1,3 +1,7 @@
+# This python script iterates the list of junit results, and creates an aggregate csv of the results
+# into the ./data/results.csv file
+# TODO: If s3 credentials around found. we'll push the results.csv to s3
+#
 import xml.etree.ElementTree as ET
 import csv
 import glob, os
