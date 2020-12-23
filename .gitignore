@@ -6,6 +6,7 @@
 /vendor
 
 Dockerfile.tmp
+Dockerfile.original
 
 results/**
 !results/.gitkeep
@@ -28,3 +29,5 @@ open-cluster-management-e2e
 open-cluster-management-e2e.test
 data/
 data.1/
+data.*/
+

@@ -26,6 +26,7 @@ var _ = Describe("Given a hub cluster web console", func() {
 			"disable-gpu",
 			"no-sandbox",
 			"incognito",
+			"window-size=1280,1024",
 		}
 
 		if testHeadless {
@@ -75,6 +76,7 @@ var _ = Describe("Given a hub cluster web console", func() {
 			page.Refresh()
 			Eventually(page.FindByClass("welcome")).Should(BeFound())
 			// wait(5)
+			Expect(page.Screenshot("./results/.test.login.screenshot.png")).To(Succeed())
 		})
 	})
 
@@ -112,6 +114,7 @@ var _ = Describe("Given a hub cluster web console", func() {
 				Expect(page).To(HaveURL(getConsoleURL(console, "/overview")))
 				Eventually(page.FindByClass("overview-header-title")).Should(BeFound())
 				wait(5)
+				Expect(page.Screenshot("./results/.test.overview.screenshot.png")).To(Succeed())
 			})
 		})
 
@@ -121,6 +124,7 @@ var _ = Describe("Given a hub cluster web console", func() {
 				Expect(page).To(HaveURL(getConsoleURL(console, "/topology/")))
 				Expect(page.FindByClass("bx--detail-page-header-title")).Should(HaveText("Topology"))
 				wait(5)
+				Expect(page.Screenshot("./results/.test.topology.screenshot.png")).To(Succeed())
 			})
 		})
 
@@ -129,8 +133,9 @@ var _ = Describe("Given a hub cluster web console", func() {
 				Expect(page.Navigate(getConsoleURL(console, "/clusters"))).To(Succeed())
 				Expect(page).To(HaveURL(getConsoleURL(console, "/clusters")))
 				Expect(page.FindByClass("bx--detail-page-header-title")).Should(HaveText("Clusters"))
-				Expect(page.FindByClass("create-import-cluster-dropdown")).Should(BeFound())
+				Eventually(page.FindByClass("create-import-cluster-dropdown")).Should(BeFound())
 				wait(5)
+				Expect(page.Screenshot("./results/.test.cluster.screenshot.png")).To(Succeed())
 			})
 		})
 
@@ -138,10 +143,17 @@ var _ = Describe("Given a hub cluster web console", func() {
 			By("navigating to /multicloud/applications", func() {
 				Expect(page.Navigate(getConsoleURL(console, "/applications"))).To(Succeed())
 				Expect(page).To(HaveURL(getConsoleURL(console, "/applications/")))
+			})
+			By("should have header label Application", func() {
 				Expect(page.FindByClass("bx--detail-page-header-title")).Should(HaveText("Applications"))
-				Expect(page.FindByButton("Create application")).Should(BeFound())
-				Expect(page.Find("table")).To(BeVisible())
+			})
+			By("should have a button name Create application", func() {
+				Eventually(page.FindByButton("Create application")).Should(BeFound())
+			})
+			By("having a table", func() {
+				Eventually(page.Find("table")).Should(BeVisible())
 				// wait(5)
+				Expect(page.Screenshot("./results/.test.application.screenshot.png")).To(Succeed())
 			})
 		})
 
@@ -154,6 +166,7 @@ var _ = Describe("Given a hub cluster web console", func() {
 				Eventually(page.FindByClass("grc-view-by-policies-table")).Should(BeFound())
 				Eventually(page.FindByButton("Policies")).Should(BeFound())
 				// wait(5)
+				Expect(page.Screenshot("./results/.test.policies.screenshot.png")).To(Succeed())
 			})
 		})
 

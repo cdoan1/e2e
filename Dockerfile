@@ -1,71 +1,27 @@
-FROM registry.fedoraproject.org/fedora-minimal:32 as build
+FROM golang:1.15-alpine as build
+MAINTAINER cdoan <cdoan@redhat.com>
 
-ENV GOPATH /go
-ENV CGO_ENABLED=0
+RUN apk update && apk add --no-cache git gcc bash musl-dev xvfb chromium chromium-chromedriver
 
-RUN microdnf -y install --nodocs wget unzip tar git gcc
+RUN go get -u github.com/onsi/ginkgo/ginkgo && go get -u github.com/onsi/gomega/...
 
-# install go into build image
-RUN wget --no-check-certificate -O - 'https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz' | tar xz -C /usr/local/
-RUN mkdir -p /go/bin
+WORKDIR /go/src/open-cluster-management-e2e
+COPY . .
 
-ENV PATH usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/go/bin:.
+RUN ginkgo build
 
-# Install ChromeDriver in build image
-# ENV CHROMEDRIVER_VERSION "80.0.3987.16"
-ENV CHROMEDRIVER_VERSION "81.0.4044.69"
-RUN wget --no-check-certificate -N https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip -P /
-RUN unzip /chromedriver_linux64.zip -d /
+FROM golang:1.15-alpine
+MAINTAINER cdoan <cdoan@redhat.com>
 
-# copy go tests into build image
-RUN mkdir -p /go/src/github.com/open-cluster-management/open-cluster-management-e2e/
-COPY . /go/src/github.com/open-cluster-management/open-cluster-management-e2e/
+RUN apk update && apk add --no-cache git gcc bash musl-dev xvfb chromium chromium-chromedriver
 
-WORKDIR "/go/src/github.com/open-cluster-management/open-cluster-management-e2e/"
+RUN go get -u github.com/onsi/ginkgo/ginkgo && go get -u github.com/onsi/gomega/...
 
-# compile go tests in build image
-RUN go get -u github.com/onsi/ginkgo/ginkgo && ginkgo build
+WORKDIR /go/src/open-cluster-management-e2e
+COPY . .
 
-# create new docker image to hold built artifacts
-FROM registry.fedoraproject.org/fedora-minimal:32
+COPY --from=build /go/src/open-cluster-management-e2e/open-cluster-management-e2e.test /go/src/open-cluster-management-e2e
 
-# run as root
-USER root
-
-# expose env vars for runtime
-ENV KUBECONFIG "/opt/.kube/config"
-ENV OPTIONS "/resources/options.yaml"
-ENV REPORT_FILE "/results/results.xml"
-ENV GINKGO_DEFAULT_FLAGS "-slowSpecThreshold=120 -timeout 7200s"
-ENV GINKGO_NODES "1"
-ENV GINKGO_FLAGS=""
-ENV GINKGO_FOCUS=""
-ENV GINKGO_SKIP=""
-
-# install chromedriver into built image
-COPY --from=build /chromedriver/ /usr/local/bin
-RUN chmod 0755 /usr/local/bin/chromedriver
-
-# install chromium - To help find a version, see http://www.rpmfind.net/linux/rpm2html/search.php?query=Chromium
-#   might need to use `microdnf repoquery "chromium"` to find valid version for microdnf to access
-# ENV CHROMIUM_VERSION "chromium-80.0.3987.163-1.fc33.x86_64"
-# ENV CHROMIUM_VERSION "chromium-81.0.4044.113-1.fc33.x86_64"
-ENV CHROMIUM_VERSION "chromium-81.*.x86_64"
-# RUN microdnf repoquery chromium
-RUN microdnf -y install --nodocs ${CHROMIUM_VERSION} && microdnf clean all
-
-# install ginkgo into built image
-COPY --from=build /go/bin/ /usr/local/bin
-
-# copy compiled tests into built image
-RUN mkdir -p /opt/tests
-
-COPY --from=build /go/src/github.com/open-cluster-management/open-cluster-management-e2e/open-cluster-management-e2e.test /opt/tests
-
-VOLUME /results
-
-WORKDIR "/opt/tests/"
-
-# execute compiled ginkgo tests
-# CMD ["/bin/bash", "-c", "ginkgo ${GINKGO_FLAGS} ${GINKGO_DEFAULT_FLAGS} -nodes=${GINKGO_NODES} --reportFile=${REPORT_FILE} open-cluster-management-e2e.test"]
-CMD ["/bin/bash", "-c", "ginkgo --v --focus=${GINKGO_FOCUS} --skip=${GINKGO_SKIP} -nodes=${GINKGO_NODES} --reportFile=${REPORT_FILE} open-cluster-management-e2e.test -- -v=3"]
+# CMD ["bash", "-c", "./entrypoint.sh"]
+# CMD ["bash", "-c", "ginkgo open-cluster-management-e2e.test"]
+ENTRYPOINT [ "./entrypoint.sh" ]
