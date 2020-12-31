@@ -15,4 +15,9 @@ run::
 clean::
 	rm -rf ./results/*.png
 
+test::
+	./hacks/loop.sh
+
+aggregate::
+	python etl/junit2csv.py
 

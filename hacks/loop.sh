@@ -1,9 +1,11 @@
 #!/bin/bash
 
-for i in {1..10}
+make build
+
+for i in {1..120}
 do
   ts=$(date +"%s")
-  echo $ts
+  # echo $ts
   # ginkgo
   make run
   mv results/results.xml ./data/$ts.results.xml

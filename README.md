@@ -17,11 +17,26 @@ ginkgo
 
 ### From Container
 
-Run the ginkgo test from docker container. 
+Run the ginkgo test from docker container.
 
 * Only `headless` mode is supported when running from docker container.
-* Screen shot is taken of reach view.
+* Screen shot is taken for each view as a last step.
+
+Run the test in a loop of iterations.
 
 ```bash
-make
+./hack/loop.sh
 ```
+
+or
+
+```bash
+make test
+```
+
+### From Kubernetes
+
+* Create a namespace where the pod will run.
+* Create a secret with credentials to the target cluster.
+* Deploy the pod.
+

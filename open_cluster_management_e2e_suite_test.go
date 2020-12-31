@@ -86,6 +86,9 @@ func TestOpenClusterManagementE2e(t *testing.T) {
 	RegisterFailHandler(Fail)
 	junitReporter := reporters.NewJUnitReporter(reportFile)
 	RunSpecsWithDefaultAndCustomReporters(t, "OpenClusterManagementE2E Suite", []Reporter{junitReporter})
+	// TODO: If we need to run in parallel
+	// junitReporter := reporters.NewJUnitReporter(fmt.Sprintf("results_%d.xml", config.GinkgoConfig.ParallelNode))
+	// RunSpecsWithDefaultAndCustomReporters(t, "OpenClusterManagementE2E Suite", []Reporter{junitReporter})
 }
 
 func initVars() {
