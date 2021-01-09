@@ -13,6 +13,7 @@ results/**
 results.xml
 
 resources/options.yaml
+resources/options.yaml*
 resources/install-config.yaml
 resources/clusterdeploy.yaml
 
@@ -28,6 +29,5 @@ local.rc
 open-cluster-management-e2e
 open-cluster-management-e2e.test
 data/
-data.1/
-data.*/
+data*/
 

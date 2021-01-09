@@ -128,13 +128,13 @@ var _ = Describe("Given a hub cluster web console", func() {
 			})
 		})
 
-		It("should allow the user to navigate and view the Clusters page (mvp)", func() {
+		// 2.2 OK, 2.1 OK
+		It("should allow the user to navigate and view the Clusters page (2.1)", func() {
 			By("navigating to /multicloud/clusters", func() {
 				Expect(page.Navigate(getConsoleURL(console, "/clusters"))).To(Succeed())
 				Expect(page).To(HaveURL(getConsoleURL(console, "/clusters")))
 				Expect(page.FindByClass("bx--detail-page-header-title")).Should(HaveText("Clusters"))
-				Eventually(page.FindByClass("create-import-cluster-dropdown")).Should(BeFound())
-				wait(5)
+				Eventually(page.FindByClass("create-import-cluster-dropdown"), 5*time.Second).Should(BeFound())
 				Expect(page.Screenshot("./results/.test.cluster.screenshot.png")).To(Succeed())
 			})
 		})
@@ -157,15 +157,34 @@ var _ = Describe("Given a hub cluster web console", func() {
 			})
 		})
 
-		It("should allow the user to navigate and view the Policy page (mvp)", func() {
+		It("should allow the user to navigate and view the Policy page (2.2)", func() {
 			By("navigating to /multicloud/policies/all", func() {
 				Expect(page.Navigate(getConsoleURL(console, "/policies/all"))).To(Succeed())
 				Expect(page).To(HaveURL(getConsoleURL(console, "/policies/all")))
 				Expect(page.FindByClass("bx--detail-page-header-title")).Should(HaveText("Governance and risk"))
 				Expect(page.FindByButton("Create policy")).Should(BeFound())
+
+				// 2.2 specific begin
 				Eventually(page.FindByClass("grc-view-by-policies-table")).Should(BeFound())
 				Eventually(page.FindByButton("Policies")).Should(BeFound())
-				// wait(5)
+				// 2.2 specific end
+
+				Expect(page.Screenshot("./results/.test.policies.screenshot.png")).To(Succeed())
+			})
+		})
+
+		It("should allow the user to navigate and view the Policy page (2.1)", func() {
+			By("navigating to /multicloud/policies/all", func() {
+				Expect(page.Navigate(getConsoleURL(console, "/policies/all"))).To(Succeed())
+				Expect(page).To(HaveURL(getConsoleURL(console, "/policies/all")))
+				Expect(page.FindByClass("bx--detail-page-header-title")).Should(HaveText("Governance and risk"))
+				Expect(page.FindByButton("Create policy")).Should(BeFound())
+
+				// 2.1 specific begin
+				Eventually(page.FirstByClass("bx--data-table-v2")).Should(BeFound())
+				Eventually(page.FirstByClass("bx--pagination__left").FindByClass("bx--select--inline").FindByClass("bx--select-input"), 60*time.Second).Should(BeFound())
+				// 2.1 specific end
+
 				Expect(page.Screenshot("./results/.test.policies.screenshot.png")).To(Succeed())
 			})
 		})
