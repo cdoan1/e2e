@@ -1,10 +1,10 @@
 #!/bin/bash
 
-for i in {1..180}
+export END=${1:-180}
+
+for i in $(seq 1 $END);
 do
   ts=$(date +"%s")
-  # echo $ts
-  # ginkgo
   ginkgo -focus="2.1"
   mv results.xml ./data/$ts.results.xml
   sleep 60

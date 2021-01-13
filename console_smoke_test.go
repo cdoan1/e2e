@@ -129,7 +129,7 @@ var _ = Describe("Given a hub cluster web console", func() {
 		})
 
 		// 2.2 OK, 2.1 OK
-		It("should allow the user to navigate and view the Clusters page (2.1)", func() {
+		It("should allow the user to navigate and view the Clusters page (2.1,2.1.1,2.1.3)", func() {
 			By("navigating to /multicloud/clusters", func() {
 				Expect(page.Navigate(getConsoleURL(console, "/clusters"))).To(Succeed())
 				Expect(page).To(HaveURL(getConsoleURL(console, "/clusters")))
@@ -139,7 +139,7 @@ var _ = Describe("Given a hub cluster web console", func() {
 			})
 		})
 
-		It("should allow the user to navigate and view the Application page (mvp)", func() {
+		It("should allow the user to navigate and view the Application page (2.1.3)", func() {
 			By("navigating to /multicloud/applications", func() {
 				Expect(page.Navigate(getConsoleURL(console, "/applications"))).To(Succeed())
 				Expect(page).To(HaveURL(getConsoleURL(console, "/applications/")))
@@ -150,9 +150,14 @@ var _ = Describe("Given a hub cluster web console", func() {
 			By("should have a button name Create application", func() {
 				Eventually(page.FindByButton("Create application")).Should(BeFound())
 			})
-			By("having a table", func() {
-				Eventually(page.Find("table")).Should(BeVisible())
-				// wait(5)
+			By("should have a table with applications", func() {
+				Eventually(page.FirstByClass("bx--data-table-v2")).Should(BeFound())
+				Eventually(page.FirstByClass("bx--pagination__left").FindByClass("bx--select--inline").FindByClass("bx--select-input"), 60*time.Second).Should(BeFound())
+				// 2.2
+				// Eventually(page.Find("table")).Should(BeVisible())
+				// Expect(page.Screenshot("./results/.test.application.screenshot.png")).To(Succeed())
+			})
+			By("screen capture", func() {
 				Expect(page.Screenshot("./results/.test.application.screenshot.png")).To(Succeed())
 			})
 		})
@@ -173,7 +178,7 @@ var _ = Describe("Given a hub cluster web console", func() {
 			})
 		})
 
-		It("should allow the user to navigate and view the Policy page (2.1)", func() {
+		It("should allow the user to navigate and view the Policy page (2.1,2.1.2)", func() {
 			By("navigating to /multicloud/policies/all", func() {
 				Expect(page.Navigate(getConsoleURL(console, "/policies/all"))).To(Succeed())
 				Expect(page).To(HaveURL(getConsoleURL(console, "/policies/all")))
