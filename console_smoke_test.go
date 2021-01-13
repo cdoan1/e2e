@@ -8,12 +8,15 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/sclevine/agouti"
 	. "github.com/sclevine/agouti/matchers"
+
+	"k8s.io/klog"
 )
 
 var _ = Describe("Given a hub cluster web console", func() {
 
 	var page *agouti.Page
 	var console, login string
+	var version string
 
 	BeforeEach(func() {
 		var err error
@@ -47,7 +50,7 @@ var _ = Describe("Given a hub cluster web console", func() {
 		Expect(page.Destroy()).To(Succeed())
 	})
 
-	It("should allow the user to login to web console", func() {
+	It("should allow the user to login to web console (2.1.3) ", func() {
 
 		By("redirecting the user to the OpenShift login form", func() {
 			Expect(page.Navigate(console)).To(Succeed())
@@ -75,7 +78,21 @@ var _ = Describe("Given a hub cluster web console", func() {
 			Expect(page).To(HaveURL(getConsoleURL(console, "/welcome")))
 			page.Refresh()
 			Eventually(page.FindByClass("welcome")).Should(BeFound())
-			// wait(5)
+			Expect(page.FindByID("acm-info-dropdown").Click())
+			Expect(page.FindByID("acm-about").Click())
+			Eventually(page.FindByClass("version-details")).Should(BeFound())
+			Eventually(page.FindByClass("version-details__no")).Should(BeFound())
+
+			// wait for the version to populate
+			wait(2)
+
+			version, _ = page.FindByClass("version-details__no").Text()
+			if version == "2.1.1" {
+				klog.V(1).Infof("A version: %s ...", version)
+			} else {
+				klog.V(1).Infof("B version: %s ...", version)
+			}
+
 			Expect(page.Screenshot("./results/.test.login.screenshot.png")).To(Succeed())
 		})
 	})
@@ -151,11 +168,15 @@ var _ = Describe("Given a hub cluster web console", func() {
 				Eventually(page.FindByButton("Create application")).Should(BeFound())
 			})
 			By("should have a table with applications", func() {
-				Eventually(page.FirstByClass("bx--data-table-v2")).Should(BeFound())
-				Eventually(page.FirstByClass("bx--pagination__left").FindByClass("bx--select--inline").FindByClass("bx--select-input"), 60*time.Second).Should(BeFound())
-				// 2.2
-				// Eventually(page.Find("table")).Should(BeVisible())
-				// Expect(page.Screenshot("./results/.test.application.screenshot.png")).To(Succeed())
+
+				if version == "2.1.1" {
+					Eventually(page.FirstByClass("bx--data-table-v2")).Should(BeFound())
+					Eventually(page.FirstByClass("bx--pagination__left").FindByClass("bx--select--inline").FindByClass("bx--select-input"), 60*time.Second).Should(BeFound())
+				} else {
+					// 2.2
+					Eventually(page.Find("table")).Should(BeVisible())
+					Expect(page.Screenshot("./results/.test.application.screenshot.png")).To(Succeed())
+				}
 			})
 			By("screen capture", func() {
 				Expect(page.Screenshot("./results/.test.application.screenshot.png")).To(Succeed())
